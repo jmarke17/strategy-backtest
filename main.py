@@ -1,5 +1,5 @@
-import os
 from strategies.base_strategy import Strategy
+
 
 def main():
     """
@@ -12,20 +12,36 @@ def main():
             asset="AAPL",
             period_start="2023-01-01",
             period_end="2023-12-31",
-            interval="1d"
+            interval="1h"
         )
 
         # Fetch the data using the strategy
         df = strategy.get_data()
 
+        # Calculate only SMA and RSI indicators
+        df_with_all_indicators = strategy.calculate_technical_indicators(indicators=[
+            'sma',
+            'ema',
+            'macd',
+            'bollinger_bands',
+            'atr',
+            'stochastic_oscillator',
+            'cci',
+            'obv',
+            'parabolic_sar',
+            'ichimoku_cloud',
+            'rsi'
+        ])
+
         # Check if the DataFrame is not empty and print the data
-        if df is not None and not df.empty:
+        if df_with_all_indicators is not None and not df.empty:
             print(df)
         else:
             print("No data available for the given parameters.")
 
     except Exception as e:
         print(f"An error occurred in the main execution: {e}")
+
 
 if __name__ == "__main__":
     # Only execute main if this script is run directly
