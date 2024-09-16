@@ -1,0 +1,76 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C Extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+dist/
+build/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+*.cover
+.hypothesis/
+.cache/
+nosetests.xml
+coverage.xml
+*.log
+
+# PyCharm IDE
+.idea/
+
+# VSCode IDE
+.vscode/
+
+# MacOS files
+.DS_Store
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Jupyter Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Data files
+data/
+
+# Log files
+*.log
+
+# Secrets / Credentials
+*.env
+.env.*
+
+# Ignore any virtual environments
+env/
+venv/
+
+# Pytest cache
+.pytest_cache/
+
+# Compiled static files (e.g., JavaScript, CSS)
+static/
+
+# Ignore backup files from editors like Vim and Emacs
+*~
+*.swp
+*.swo
