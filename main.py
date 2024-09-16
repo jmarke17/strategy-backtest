@@ -33,6 +33,8 @@ def main():
             'rsi'
         ])
 
+        strategy.plot()
+
         # Check if the DataFrame is not empty and print the data
         if df_with_all_indicators is not None and not df.empty:
             print(df)

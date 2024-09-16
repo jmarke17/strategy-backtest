@@ -453,3 +453,161 @@ class Strategy:
         except Exception as e:
             print(f"An error occurred while calculating technical indicators: {e}")
             return None
+
+    def plot(self, indicators=None):
+        """
+        Plot the asset price data along with selected technical indicators.
+
+        :param indicators: List of indicator names to plot. If None, plots all available indicators.
+        """
+        try:
+            if self.data is None or self.data.empty:
+                print("No data available to plot.")
+                return
+
+            # Default to all indicators if none specified
+            if indicators is None:
+                indicators = [
+                    'sma', 'ema', 'macd', 'bollinger_bands', 'atr',
+                    'stochastic_oscillator', 'cci', 'obv', 'parabolic_sar',
+                    'ichimoku_cloud', 'rsi'
+                ]
+
+            # Plotting
+            import matplotlib.pyplot as plt
+            import matplotlib.dates as mdates
+
+            # Set up the main plot
+            fig, ax_price = plt.subplots(figsize=(14, 7))
+
+            # Plot the closing price
+            ax_price.plot(self.data.index, self.data['Close'], label='Close Price', color='blue')
+
+            # Plot indicators that overlay on the price chart
+            if 'sma' in indicators and f'SMA_20' in self.data.columns:
+                ax_price.plot(self.data.index, self.data[f'SMA_20'], label='SMA (20)', color='orange')
+            if 'ema' in indicators and f'EMA_20' in self.data.columns:
+                ax_price.plot(self.data.index, self.data[f'EMA_20'], label='EMA (20)', color='green')
+            if 'bollinger_bands' in indicators and 'Bollinger_Upper' in self.data.columns:
+                ax_price.plot(self.data.index, self.data['Bollinger_Middle'], label='Bollinger Middle', color='magenta')
+                ax_price.plot(self.data.index, self.data['Bollinger_Upper'], label='Bollinger Upper', linestyle='--', color='grey')
+                ax_price.plot(self.data.index, self.data['Bollinger_Lower'], label='Bollinger Lower', linestyle='--', color='grey')
+            if 'parabolic_sar' in indicators and 'Parabolic_SAR' in self.data.columns:
+                ax_price.scatter(self.data.index, self.data['Parabolic_SAR'], label='Parabolic SAR', color='red', marker='.', s=5)
+
+            # Set labels and legend for the price chart
+            ax_price.set_title(f'{self.asset} Price and Technical Indicators')
+            ax_price.set_xlabel('Date')
+            ax_price.set_ylabel('Price')
+            ax_price.legend(loc='upper left')
+
+            # Create additional subplots for other indicators
+            subplot_count = 0
+            subplot_positions = {}
+
+            # Determine which additional subplots are needed
+            if 'macd' in indicators and 'MACD' in self.data.columns:
+                subplot_count += 1
+                subplot_positions['macd'] = subplot_count
+            if 'rsi' in indicators and 'RSI' in self.data.columns:
+                subplot_count += 1
+                subplot_positions['rsi'] = subplot_count
+            if 'stochastic_oscillator' in indicators and '%K' in self.data.columns:
+                subplot_count += 1
+                subplot_positions['stochastic_oscillator'] = subplot_count
+            if 'cci' in indicators and 'CCI' in self.data.columns:
+                subplot_count += 1
+                subplot_positions['cci'] = subplot_count
+            if 'atr' in indicators and 'ATR' in self.data.columns:
+                subplot_count += 1
+                subplot_positions['atr'] = subplot_count
+            if 'obv' in indicators and 'OBV' in self.data.columns:
+                subplot_count += 1
+                subplot_positions['obv'] = subplot_count
+
+            # Create subplots
+            if subplot_count > 0:
+                fig.subplots_adjust(hspace=0.5)
+                # Re-create figure with additional subplots
+                fig, ax = plt.subplots(subplot_count + 1, 1, figsize=(14, 5 + subplot_count * 3), sharex=True)
+                ax_price = ax[0]
+                # Plot the closing price
+                ax_price.plot(self.data.index, self.data['Close'], label='Close Price', color='blue')
+                # Plot overlays on price chart
+                if 'sma' in indicators and f'SMA_20' in self.data.columns:
+                    ax_price.plot(self.data.index, self.data[f'SMA_20'], label='SMA (20)', color='orange')
+                if 'ema' in indicators and f'EMA_20' in self.data.columns:
+                    ax_price.plot(self.data.index, self.data[f'EMA_20'], label='EMA (20)', color='green')
+                if 'bollinger_bands' in indicators and 'Bollinger_Upper' in self.data.columns:
+                    ax_price.plot(self.data.index, self.data['Bollinger_Middle'], label='Bollinger Middle', color='magenta')
+                    ax_price.plot(self.data.index, self.data['Bollinger_Upper'], label='Bollinger Upper', linestyle='--', color='grey')
+                    ax_price.plot(self.data.index, self.data['Bollinger_Lower'], label='Bollinger Lower', linestyle='--', color='grey')
+                if 'parabolic_sar' in indicators and 'Parabolic_SAR' in self.data.columns:
+                    ax_price.scatter(self.data.index, self.data['Parabolic_SAR'], label='Parabolic SAR', color='red', marker='.', s=5)
+                # Set labels and legend for price chart
+                ax_price.set_title(f'{self.asset} Price and Technical Indicators')
+                ax_price.set_ylabel('Price')
+                ax_price.legend(loc='upper left')
+
+                # Plot MACD
+                if 'macd' in subplot_positions:
+                    idx = subplot_positions['macd']
+                    ax_macd = ax[idx]
+                    ax_macd.plot(self.data.index, self.data['MACD'], label='MACD', color='blue')
+                    ax_macd.plot(self.data.index, self.data['Signal_Line'], label='Signal Line', color='red')
+                    ax_macd.bar(self.data.index, self.data['MACD'] - self.data['Signal_Line'], label='MACD Histogram', color='grey')
+                    ax_macd.set_ylabel('MACD')
+                    ax_macd.legend(loc='upper left')
+                # Plot RSI
+                if 'rsi' in subplot_positions:
+                    idx = subplot_positions['rsi']
+                    ax_rsi = ax[idx]
+                    ax_rsi.plot(self.data.index, self.data['RSI'], label='RSI', color='purple')
+                    ax_rsi.axhline(70, color='red', linestyle='--')
+                    ax_rsi.axhline(30, color='green', linestyle='--')
+                    ax_rsi.set_ylabel('RSI')
+                    ax_rsi.legend(loc='upper left')
+                # Plot Stochastic Oscillator
+                if 'stochastic_oscillator' in subplot_positions:
+                    idx = subplot_positions['stochastic_oscillator']
+                    ax_stoch = ax[idx]
+                    ax_stoch.plot(self.data.index, self.data['%K'], label='%K', color='blue')
+                    ax_stoch.plot(self.data.index, self.data['%D'], label='%D', color='red')
+                    ax_stoch.axhline(80, color='red', linestyle='--')
+                    ax_stoch.axhline(20, color='green', linestyle='--')
+                    ax_stoch.set_ylabel('Stochastic Oscillator')
+                    ax_stoch.legend(loc='upper left')
+                # Plot CCI
+                if 'cci' in subplot_positions:
+                    idx = subplot_positions['cci']
+                    ax_cci = ax[idx]
+                    ax_cci.plot(self.data.index, self.data['CCI'], label='CCI', color='brown')
+                    ax_cci.axhline(100, color='red', linestyle='--')
+                    ax_cci.axhline(-100, color='green', linestyle='--')
+                    ax_cci.set_ylabel('CCI')
+                    ax_cci.legend(loc='upper left')
+                # Plot ATR
+                if 'atr' in subplot_positions:
+                    idx = subplot_positions['atr']
+                    ax_atr = ax[idx]
+                    ax_atr.plot(self.data.index, self.data['ATR'], label='ATR', color='orange')
+                    ax_atr.set_ylabel('ATR')
+                    ax_atr.legend(loc='upper left')
+                # Plot OBV
+                if 'obv' in subplot_positions:
+                    idx = subplot_positions['obv']
+                    ax_obv = ax[idx]
+                    ax_obv.plot(self.data.index, self.data['OBV'], label='OBV', color='magenta')
+                    ax_obv.set_ylabel('OBV')
+                    ax_obv.legend(loc='upper left')
+
+                # Set x-label on the last subplot
+                ax[-1].set_xlabel('Date')
+            else:
+                ax_price.set_xlabel('Date')
+
+            plt.tight_layout()
+            plt.show()
+
+        except Exception as e:
+            print(f"An error occurred while plotting: {e}")
